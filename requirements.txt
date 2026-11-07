@@ -1,0 +1,14 @@
+# Core numerical and data manipulation
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Data visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Machine Learning & model persistence
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Web application framework
+streamlit>=1.28.0
