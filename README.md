@@ -201,3 +201,28 @@ GitHub: [akulacharanya0603-coder](https://github.com/akulacharanya0603-coder)
 ---
 
 ⭐ If you find this project interesting, feel free to explore the repository!
+## 📸 Project Screenshots
+
+### 1. Main Dashboard
+![Main Dashboard](screenshots/01_main_dashboard.png)
+
+### 2. Model Comparison
+![Model Comparison](screenshots/02_model_comparison.png)
+
+### 3. Model Interpretation
+![Model Interpretation](screenshots/03_model_interpretation.png)
+
+### 4. ICU Admission Prediction
+![Prediction Section](screenshots/04_prediction_section.png)
+
+### 5. Single Patient Prediction
+![Single Patient Prediction](screenshots/05_single_prediction.png)
+
+### 6. Single Patient Results
+![Single Patient Results](screenshots/06_single_result.png)
+
+### 7. Batch CSV Upload
+![Batch CSV Upload](screenshots/07_batch_upload.png)
+
+### 8. Batch Prediction Results
+![Batch Results](screenshots/08_batch_results.png)
