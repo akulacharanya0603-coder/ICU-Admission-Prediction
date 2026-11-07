@@ -16,13 +16,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 MODEL_PATH = PROJECT_ROOT / "models" / "icu_logistic_model.pkl"
 
-DATA_PATH = (
-    PROJECT_ROOT / "data" / "processed" / "icu_prediction_data.csv"
-)
+DATA_PATH = PROJECT_ROOT / "data" / "processed" / "icu_prediction_data.csv"
 
-COMPARISON_PATH = (
-    PROJECT_ROOT / "data" / "processed" / "model_comparison.png"
-)
+COMPARISON_PATH = PROJECT_ROOT / "data" / "processed" / "model_comparison.png"
 
 
 # =========================================================
@@ -37,26 +33,20 @@ st.set_page_config(
 
 
 # =========================================================
-# PROFESSIONAL HEALTHCARE THEME
+# HEALTHCARE DASHBOARD THEME
 # =========================================================
 
 st.markdown("""
 <style>
-
-/* Main application background */
 
 .stApp {
     background-color: #f1f5fb;
     color: #1e293b;
 }
 
-/* Main content area */
-
 [data-testid="stMain"] {
     background-color: #f1f5fb;
 }
-
-/* Headings */
 
 h1 {
     color: #12345a !important;
@@ -73,14 +63,10 @@ h3 {
     font-weight: 650 !important;
 }
 
-/* Regular text */
-
 [data-testid="stMarkdownContainer"] p,
 [data-testid="stMarkdownContainer"] li {
     color: #26364a;
 }
-
-/* Metric cards */
 
 [data-testid="stMetric"] {
     background-color: #ffffff;
@@ -90,20 +76,14 @@ h3 {
     box-shadow: 0 3px 12px rgba(30, 64, 100, 0.08);
 }
 
-/* Metric labels */
-
 [data-testid="stMetricLabel"] {
     color: #475569 !important;
 }
-
-/* Metric values */
 
 [data-testid="stMetricValue"] {
     color: #087e9b !important;
     font-weight: 750 !important;
 }
-
-/* Buttons */
 
 .stButton > button {
     background-color: #087e9b;
@@ -119,22 +99,16 @@ h3 {
     color: white !important;
 }
 
-/* Download button */
-
 .stDownloadButton > button {
     background-color: #164e63;
     color: white !important;
     border-radius: 9px;
 }
 
-/* Tabs */
-
 button[data-baseweb="tab"] {
     color: #17456e !important;
     font-weight: 600;
 }
-
-/* Sidebar */
 
 [data-testid="stSidebar"] {
     background-color: #e1ebf5;
@@ -144,23 +118,11 @@ button[data-baseweb="tab"] {
     color: #17365d;
 }
 
-/* Dataframes */
-
 [data-testid="stDataFrame"] {
     background-color: white;
     border: 1px solid #d6e1ed;
     border-radius: 10px;
 }
-
-/* Input fields */
-
-.stTextInput input,
-.stNumberInput input {
-    background-color: white;
-    color: #1e293b;
-}
-
-/* File uploader */
 
 [data-testid="stFileUploader"] {
     background-color: #ffffff;
@@ -169,19 +131,13 @@ button[data-baseweb="tab"] {
     padding: 12px;
 }
 
-/* Alerts */
-
 [data-testid="stAlert"] {
     border-radius: 10px;
 }
 
-/* Divider */
-
 hr {
     border-color: #d6e1ed;
 }
-
-/* Disclaimer */
 
 .disclaimer-box {
     background-color: #e3f2fd;
@@ -193,8 +149,6 @@ hr {
     font-size: 14px;
     line-height: 1.7;
 }
-
-/* Footer */
 
 .footer {
     text-align: center;
@@ -208,21 +162,18 @@ hr {
 
 
 # =========================================================
-# LOAD MODEL
+# LOAD TRAINED MODEL
 # =========================================================
 
 @st.cache_resource
 def load_model():
-
     return joblib.load(MODEL_PATH)
 
 
 try:
-
     model = load_model()
 
 except Exception as e:
-
     st.error(f"Unable to load the trained model: {e}")
     st.stop()
 
@@ -233,16 +184,13 @@ except Exception as e:
 
 @st.cache_data
 def load_dataset():
-
     return pd.read_csv(DATA_PATH)
 
 
 try:
-
     data = load_dataset()
 
 except Exception as e:
-
     st.error(f"Unable to load the prediction dataset: {e}")
     st.stop()
 
@@ -313,8 +261,6 @@ def show_risk_gauge(probability):
 
     ax.axis("off")
 
-    # Background gauge
-
     background = Wedge(
         (0, 0),
         1,
@@ -325,8 +271,6 @@ def show_risk_gauge(probability):
     )
 
     ax.add_patch(background)
-
-    # Prediction gauge
 
     angle = probability * 180
 
@@ -366,43 +310,30 @@ def show_risk_gauge(probability):
 
 
 # =========================================================
-# FEATURE IMPORTANCE
+# FEATURE IMPORTANCE - CORRECTED VERSION
 # =========================================================
 
 def show_feature_importance():
 
     try:
 
-        classifier = model
+        # Get final Logistic Regression classifier
+        classifier = model.steps[-1][1]
 
-        if hasattr(model, "named_steps"):
+        # Get preprocessing pipeline
+        preprocessing = model[:-1]
 
-            classifier = list(model.named_steps.values())[-1]
+        # Retrieve transformed feature names
+        feature_names = preprocessing.get_feature_names_out()
 
-        if not hasattr(classifier, "coef_"):
-
-            st.info(
-                "Feature importance is not available for this model."
-            )
-
-            return
-
+        # Retrieve model coefficients
         coefficients = classifier.coef_[0]
-
-        if hasattr(model, "feature_names_in_"):
-
-            feature_names = list(model.feature_names_in_)
-
-        else:
-
-            feature_names = [
-                f"Feature {i + 1}"
-                for i in range(len(coefficients))
-            ]
 
         if len(feature_names) != len(coefficients):
 
-            st.info("Feature names could not be matched.")
+            st.warning(
+                "Feature names and model coefficients do not match."
+            )
             return
 
         importance = pd.DataFrame({
@@ -415,13 +346,13 @@ def show_feature_importance():
         )
 
         importance = importance.sort_values(
-            "Absolute Importance",
+            by="Absolute Importance",
             ascending=False
         ).head(10)
 
-        st.markdown("### Top 10 Influential Features")
+        st.markdown("### Top 10 Influential Clinical Features")
 
-        fig, ax = plt.subplots(figsize=(9, 5))
+        fig, ax = plt.subplots(figsize=(10, 6))
 
         ax.barh(
             importance["Feature"],
@@ -432,7 +363,13 @@ def show_feature_importance():
 
         ax.set_ylabel("Clinical Features")
 
-        ax.set_title("Top Influential Features")
+        ax.set_title("Top 10 Influential Features")
+
+        ax.axvline(
+            x=0,
+            color="black",
+            linewidth=0.8
+        )
 
         ax.invert_yaxis()
 
@@ -443,13 +380,15 @@ def show_feature_importance():
         plt.close(fig)
 
         st.caption(
-            "Coefficients represent model associations, not causal effects."
+            "Positive coefficients increase the model's predicted "
+            "log-odds of ICU admission, while negative coefficients "
+            "decrease them. These are associations, not causal effects."
         )
 
-    except Exception:
+    except Exception as e:
 
-        st.info(
-            "Feature importance could not be generated from the saved model."
+        st.warning(
+            f"Feature importance could not be generated: {e}"
         )
 
 
@@ -457,9 +396,7 @@ def show_feature_importance():
 # HEADER
 # =========================================================
 
-st.markdown(
-    "# 🏥 ICU Admission Prediction System"
-)
+st.markdown("# 🏥 ICU Admission Prediction System")
 
 st.markdown(
     "### Machine Learning-Based Healthcare Research Prototype"
@@ -486,7 +423,6 @@ for real-world diagnosis, treatment, or clinical decisions.
 
 </div>
 """, unsafe_allow_html=True)
-
 
 st.markdown("---")
 
@@ -527,18 +463,16 @@ else:
 
     st.warning("Model comparison image was not found.")
 
-
 st.markdown("---")
 
 
 # =========================================================
-# FEATURE IMPORTANCE
+# MODEL INTERPRETATION
 # =========================================================
 
 st.markdown("## 🔍 Model Interpretation")
 
 show_feature_importance()
-
 
 st.markdown("---")
 
@@ -556,7 +490,7 @@ tab1, tab2 = st.tabs([
 
 
 # =========================================================
-# TAB 1 - SINGLE PATIENT
+# TAB 1 - SINGLE PATIENT PREDICTION
 # =========================================================
 
 with tab1:
@@ -593,11 +527,15 @@ with tab1:
 
                 if prediction == 1:
 
-                    st.error("Predicted Outcome: Future ICU Admission")
+                    st.error(
+                        "Predicted Outcome: Future ICU Admission"
+                    )
 
                 else:
 
-                    st.success("Predicted Outcome: No Future ICU Admission")
+                    st.success(
+                        "Predicted Outcome: No Future ICU Admission"
+                    )
 
                 st.metric(
                     "Predicted ICU Probability",
@@ -638,7 +576,7 @@ with tab1:
 
 
 # =========================================================
-# TAB 2 - BATCH PREDICTION
+# TAB 2 - BATCH CSV PREDICTION
 # =========================================================
 
 with tab2:
